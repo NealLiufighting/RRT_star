@@ -8,19 +8,19 @@ function RRT_star
     daspect([1 1 1])
     title('RRT')    
        
-    delay=0.02; % Задержка отрисовки 
+    delay=0.02; % Rendering delay 
 
-    C_init = point(0.2, 0.2); % Начальное положение
-    C_goal = point(0.8, 0.8); % Целевая точка
+    C_init = point(0.2, 0.2); % Initial position
+    C_goal = point(0.8, 0.8); % Target point
     N_steps=1000;
     p = 0.001;
-    eps = 0.03; % Точность
+    eps = 0.03; % Accuracy
     
     T = struct('vertex',[],'edge',[]);
      
     plot(C_init.x,C_init.y,'.','markersize',24,'color','b'); % init
     plot(C_goal.x,C_goal.y,'.','markersize',24,'color','r'); % goal
-    obstacle=[point(0.3,0.3), point(0.8,0.3), point(0.7,0.7), point(0.3,0.7)]; % препятствие
+    obstacle=[point(0.3,0.3), point(0.8,0.3), point(0.7,0.7), point(0.3,0.7)];
     xs=[obstacle(1).x obstacle(2).x obstacle(3).x obstacle(4).x obstacle(1).x];
     ys=[obstacle(1).y obstacle(2).y obstacle(3).y obstacle(4).y obstacle(1).y];
     plot(xs,ys,'linewidth',2,'color','k'); % obstacle     
@@ -37,7 +37,7 @@ function RRT_star
         
         C_rand=GenerateState();
         
-        % Ближайшая вершина дерева
+        % Nearest tree vertex
         [C_near,index]=NearestNeighbour(C_rand,T); 
         
         h1 = plot([C_near.x C_rand.x], [C_near.y C_rand.y], 'k:');
@@ -46,7 +46,7 @@ function RRT_star
         delete(h1);
         delete(h2);
         
-        % Поиск безконфликтной конфигурации на отрезке
+        % Finding a conflict-free configuration on a segment
         C_new=FindStoppingState(C_near,C_rand,p,obstacle);  
         if(~isequaln(C_new,C_near))            
             
@@ -59,14 +59,14 @@ function RRT_star
             
             hcircle = viscircles(gca,[C_new.x C_new.y],r,'color',[0.7 0.7 0.7],'linestyle','--');
                         
-            % Поиск вершин дерева внутри шара радиуса r с центром в C_new
+            % Search tree nodes inside the sphere of radius r with the center in C_new
             [C_Nearest_ind, distance_to_new]=NearestNeighbours(C_new,T,r); 
             if(~isempty(C_Nearest_ind))
             
-                % Сортировка найденных вершин по стоимости пути с
+                % Sorting of found vertexes at cost
                 [sorted_costs,i_sort] = SortNearestNeighbours(C_Nearest_ind,costs,distance_to_new); 
                         
-                % Поиск среди найденных вершин доступной с минимальной стоимостью            
+                % Search among the found vertexes available with minimum cost    
                 [new_cost,i_parent] = MinCostParent(T,C_new,C_Nearest_ind,p,obstacle,sorted_costs,i_sort); 
                                         
                 pause(delay);
@@ -81,7 +81,7 @@ function RRT_star
             
                 linehandles = [linehandles h_new];            
             
-            % Оптимизация путей внутри шара с учетом новой вершины
+            % Optimization of paths inside the sphere with a new vertex
             [linehandles,parents,costs] = Rewire(T,tree_size,new_cost,distance_to_new,costs,parents,C_Nearest_ind,C_new,p,obstacle,linehandles,delay); 
             
             end

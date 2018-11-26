@@ -9,19 +9,19 @@ function RRT
     daspect([1 1 1])
     title('RRT')    
     
-    delay=0.5; % Задержка отрисовки
+    delay=0.5; % Rendering delay
 
-    C_init = point(0.2, 0.2); % Начальное положение
-    C_goal = point(0.8, 0.8); % Целевая точка
+    C_init = point(0.2, 0.2); % Initial position
+    C_goal = point(0.8, 0.8); % Target point
     N_steps=1000;
-    N_extend=10; % Попытка включить целевую точку в дерево
+    N_extend=10; % Trying to include a target point in the tree
     p = 0.02; 
     
     T = struct('vertex',[],'edge',[]);
      
     plot(C_init.x,C_init.y,'.','markersize',24,'color','b'); % init
     plot(C_goal.x,C_goal.y,'.','markersize',24,'color','r'); % goal
-    obstacle=[point(0.3,0.3), point(0.8,0.3), point(0.7,0.7), point(0.3,0.7)]; % препятствие
+    obstacle=[point(0.3,0.3), point(0.8,0.3), point(0.7,0.7), point(0.3,0.7)]; % obstacle
     xs=[obstacle(1).x obstacle(2).x obstacle(3).x obstacle(4).x obstacle(1).x];
     ys=[obstacle(1).y obstacle(2).y obstacle(3).y obstacle(4).y obstacle(1).y];
     plot(xs,ys,'linewidth',2,'color','k'); %      
@@ -37,10 +37,11 @@ function RRT
         if(0 ~= mod(step,N_extend))
             C_rand=GenerateState();
         else
-            C_rand=C_goal; % Попытка включить целевую точку в дерево
+            C_rand=C_goal; % Trying to include a target point in the tree
         end
         
-        [C_near,index]=NearestNeighbour(C_rand,T); % Ближайшая вершина дерева
+        % Nearest tree vertex
+        [C_near,index]=NearestNeighbour(C_rand,T); 
         
         h1 = plot([C_near.x C_rand.x], [C_near.y C_rand.y], 'k:');
         h2 = plot(C_rand.x, C_rand.y, '.k', 'markersize', 10);
@@ -48,7 +49,8 @@ function RRT
         delete(h1);
         delete(h2);
         
-        C_new=FindStoppingState(C_near,C_rand,p,obstacle); % Поиск безконфликтной конфигурации на отрезке
+        % Finding a conflict-free configuration on a segment
+        C_new=FindStoppingState(C_near,C_rand,p,obstacle); 
         
         if(~isequaln(C_new,C_near)) 
         
